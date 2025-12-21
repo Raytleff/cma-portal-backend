@@ -7,7 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-model users {
+
+model udm_tbl_users {
   id          String    @id @default(uuid())
   fullname    String?
   username    String    @unique
@@ -16,4 +17,51 @@ model users {
   status      String?
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
+
+  user_roles  udm_tbl_user_roles[]
 }
+
+model udm_tbl_roles {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user_roles  udm_tbl_user_roles[]
+  role_permissions udm_tbl_role_permissions[]
+}
+
+model udm_tbl_user_roles {
+  id      Int    @id @default(autoincrement())
+  userId  String
+  roleId  String
+
+  user    udm_tbl_users  @relation(fields: [userId], references: [id])
+  role    udm_tbl_roles  @relation(fields: [roleId], references: [id])
+  
+
+  @@unique([userId, roleId])
+}
+
+model udm_tbl_permissions {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  role_permissions udm_tbl_role_permissions[]
+}
+
+model udm_tbl_role_permissions {
+  id           Int     @id @default(autoincrement())
+  roleId       String
+  permissionId String
+
+  role         udm_tbl_roles       @relation(fields: [roleId], references: [id])
+  permission   udm_tbl_permissions @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
