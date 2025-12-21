@@ -1,11 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { Pool } from '@neondatabase/serverless';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import dotenv from 'dotenv';
 
-const connectionString = process.env.DATABASE_URL as string;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaNeon(pool);
+dotenv.config();
 
-const prisma = new PrismaClient({ adapter });
-
+const prisma = new PrismaClient();
 export default prisma;
