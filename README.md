@@ -16,7 +16,7 @@ A robust Node.js backend application built with Express, TypeScript, Prisma, and
 
 ## 📋 Prerequisites
 
-- **Node.js** (v18 or higher)
+- **Node.js** (v19 or higher)
 - **npm** or **yarn**
 - **PostgreSQL** (v12 or higher)
 - **Git** with configured user credentials
