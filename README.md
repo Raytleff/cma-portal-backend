@@ -311,5 +311,3 @@ This project is licensed under the ISC License.
 - Your Name - CMA-PORTAL DEVS
 
 ---
-
-**Built with ❤️ using TypeScript and Express**
