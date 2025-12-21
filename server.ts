@@ -10,19 +10,20 @@ import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
 import { Server, Socket } from 'socket.io';
-import prisma from './config/prisma';
+import prisma from './config/prisma.js';
 
-import { errorHandler } from './middleware/errorMiddleware';
-import { corsOptions } from './config/corsOptions';
+import { errorHandler } from './middleware/errorMiddleware.js';
+import { corsOptions } from './config/corsOptions.js';
 
-
-import usersRoutes from './routes/usersRoutes';
-import googleRoutes from './routes/googleRoutes';
-import imageRoutes from './routes/uploadImageRoutes';
+import usersRoutes from './routes/usersRoutes.js';
+import googleRoutes from './routes/googleRoutes.js';
+import imageRoutes from './routes/uploadImageRoutes.js';
 
 dotenv.config();
-
 
 const app: Application = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -32,6 +33,10 @@ const io = new Server(server, {
   cors: corsOptions,
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -54,15 +59,17 @@ passport.deserializeUser((obj, done) => done(null, obj));
 
 app.use(cors(corsOptions));
 
+// Swagger UI Route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'CMA Portal API Documentation',
+  customfavIcon: '/favicon.ico'
+}));
 
-
+// API Routes
 app.use('/api/users', usersRoutes);
 // app.use('/api/auth', googleRoutes);
 // app.use('/api/images', imageRoutes);
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 if (process.env.NODE_ENV === 'production') {
   const clientPath = path.join(__dirname, '../frontend/build');
@@ -73,14 +80,20 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(clientPath, 'index.html'));
   });
 } else {
-  app.get('/', (_, res) => res.send('API running...'));
+  app.get('/', (_, res) => {
+    res.send(`
+      <h1>CMA Portal API</h1>
+      <p>API is running...</p>
+      <a href="/api-docs">📚 View API Documentation</a>
+    `);
+  });
 }
 
 app.use(errorHandler);
 
-
 server.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📚 API Docs available at http://localhost:${PORT}/api-docs`);
   
   try {
     await prisma.$connect();
