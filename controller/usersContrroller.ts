@@ -141,7 +141,7 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
             id,
             username,
             password: hashedPassword,
-            dateofbirth,
+            dateofbirth: new Date(dateofbirth),
             status
           }
         });
