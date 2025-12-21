@@ -1,1 +1,2 @@
-# cma-portal-backend
+# Party-Finder-Backend
+Party Finder Backend
