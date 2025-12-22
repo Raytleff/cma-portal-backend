@@ -253,3 +253,4 @@ export const logoutUser = asyncHandler(async (_req: Request, res: Response) => {
     return res.status(500).json({ msg: 'Internal Server Error' });
   }
 });
+ 
