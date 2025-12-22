@@ -154,7 +154,7 @@ components:
           example: "Detailed error information"
 
 paths:
-  /api/users/loginUser:
+  /api/users/login:
     post:
       tags:
         - Authentication
@@ -198,7 +198,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/users/refreshToken:
+  /api/users/refresh-token:
     get:
       tags:
         - Authentication
@@ -226,7 +226,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/users/createUser:
+  /api/users/register:
     post:
       tags:
         - Authentication
