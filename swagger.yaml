@@ -44,10 +44,6 @@ components:
         username:
           type: string
           example: "johndoe"
-        dateofbirth:
-          type: string
-          format: date
-          example: "1990-01-15"
         status:
           type: string
           example: "active"
@@ -85,7 +81,6 @@ components:
       required:
         - username
         - password
-        - dateofbirth
         - status
       properties:
         username:
@@ -95,10 +90,6 @@ components:
           type: string
           format: password
           example: "SecurePass123"
-        dateofbirth:
-          type: string
-          format: date
-          example: "1990-01-15"
         status:
           type: string
           example: "active"
@@ -121,7 +112,6 @@ components:
       required:
         - username
         - password
-        - dateofbirth
       properties:
         username:
           type: string
@@ -130,10 +120,6 @@ components:
           type: string
           format: password
           example: "NewSecurePass123"
-        dateofbirth:
-          type: string
-          format: date
-          example: "1990-01-15"
 
     UsersResponse:
       type: object
