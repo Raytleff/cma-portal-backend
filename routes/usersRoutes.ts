@@ -7,7 +7,7 @@ import {
   updateUser,
   deleteUser,
   refreshToken
-} from '../controller/usersContrroller';
+} from '../controller/usersController';
 import { protect } from '../middleware/authMiddleware';
 import loginLimiter from '../middleware/limiterMiddleware';
 
