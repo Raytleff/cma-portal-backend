@@ -15,7 +15,7 @@ interface DecodedToken {
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+    udm_tbl_users?: any
     }
   }
 }
@@ -29,7 +29,7 @@ export const protect = asyncHandler(async (req: Request, res: Response, next: Ne
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
 
-      const user = await prisma.users.findUnique({
+      const user = await prisma.udm_tbl_users.findUnique({
         where: { id: decoded.UserInfo.id }
       });
 
