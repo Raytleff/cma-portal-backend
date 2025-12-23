@@ -20,6 +20,7 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 import { corsOptions } from './config/corsOptions.js';
 
 import usersRoutes from './routes/usersRoutes.js';
+import rolesRoutes from './routes/rolesRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import imageRoutes from './routes/uploadImageRoutes.js';
 
@@ -68,6 +69,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 
 // API Routes
 app.use('/api/users', usersRoutes);
+app.use('/api/roles', rolesRoutes);
 // app.use('/api/auth', googleRoutes);
 // app.use('/api/images', imageRoutes);
 
