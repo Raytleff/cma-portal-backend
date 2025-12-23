@@ -15,7 +15,7 @@ interface DecodedToken {
 declare global {
   namespace Express {
     interface Request {
-    users?: any
+    udm_tbl_users?: any
     }
   }
 }
