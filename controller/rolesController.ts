@@ -26,7 +26,7 @@ export const getRoles = asyncHandler(async (_req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
-});
+}); 
 
 export const roleById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -110,15 +110,15 @@ export const updateRole = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+export const deleteRole = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const deletedUser = await prisma.udm_tbl_users.delete({
+    const deletedRole = await prisma.udm_tbl_roles.delete({
       where: { id },
     });
 
-    return res.status(200).json({ msg: "OK", data: deletedUser });
+    return res.status(200).json({ msg: "OK", data: deletedRole });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
