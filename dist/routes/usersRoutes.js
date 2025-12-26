@@ -1,26 +1,14 @@
 import express from 'express';
-import {
-  userLogin,
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-  refreshToken,
-  logoutUser
-} from '../controller/usersController';
+import { userLogin, getUsers, getUserById, createUser, updateUser, deleteUser, refreshToken, logoutUser } from '../controller/usersController';
 import { protect } from '../middleware/authMiddleware';
 import loginLimiter from '../middleware/limiterMiddleware';
-
 const router = express.Router();
-
 router.post("/login", loginLimiter, userLogin);
-router.post("/refresh-token", refreshToken)
+router.post("/refresh-token", refreshToken);
 router.get("/allUsers", protect, getUsers);
 router.get("/userById/:id", protect, getUserById);
 router.post("/register", createUser);
 router.put("/updateUser/:id", protect, updateUser);
 router.delete("/deleteUser/:id", protect, deleteUser);
-router.post("/logout", logoutUser)
-
-export default router
+router.post("/logout", logoutUser);
+export default router;
