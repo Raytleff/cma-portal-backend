@@ -9,14 +9,14 @@ datasource db {
 }
 
 model udm_tbl_users {
-  id          String               @id @default(uuid())
-  fullname    String?
-  email       String               @unique
-  password    String
-  status      String?
-  created_at  DateTime             @default(now())
-  updated_at  DateTime             @updatedAt
-  user_roles  udm_tbl_user_roles[]
+  id         String               @id @default(uuid())
+  fullname   String?
+  password   String
+  status     String?
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+  email      String               @unique
+  user_roles udm_tbl_user_roles[]
 }
 
 model udm_tbl_roles {
@@ -56,4 +56,96 @@ model udm_tbl_role_permissions {
   role         udm_tbl_roles       @relation(fields: [roleId], references: [id])
 
   @@unique([roleId, permissionId])
+}
+
+model ddm_tbl_driverInfo {
+  id            String  @id @default(uuid())
+  userId        String  @unique
+  fullname      String
+  callSign      String?
+  address       String?
+  contactNumber String?
+
+  carAssignment DriverCarAssignment
+
+  spouseName    String?
+  spouseContact String?
+
+  sssNumber        String?
+  philhealthNumber String?
+  pagibigNumber    String?
+
+  licenseImageUrl String?
+  licenseNumber   String?
+  licenseExpiry   DateTime?
+
+  status DriverStatus @default(ACTIVE)
+
+  apprehensions ddm_tbl_driverApprehension[]
+  ledgers       ddm_tbl_driverLedgers[]
+  contributions ddm_tbl_driverContributions[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ddm_tbl_driverApprehension {
+  id            String   @id @default(uuid())
+  driverId      String
+  violationType String
+  ticketExpiry  DateTime
+  isHeld        Boolean  @default(false)
+
+  driver ddm_tbl_driverInfo @relation(fields: [driverId], references: [id])
+
+  created_at DateTime @default(now())
+}
+
+model ddm_tbl_driverLedgers {
+  id       String     @id @default(uuid())
+  driverId String
+  type     LedgerType
+  amount   Decimal    @db.Decimal(12, 2)
+  remarks  String?
+
+  driver ddm_tbl_driverInfo @relation(fields: [driverId], references: [id])
+
+  created_at DateTime @default(now())
+}
+
+model ddm_tbl_driverContributions {
+  id               String           @id @default(uuid())
+  driverId         String
+  contributionType ContributionType
+  referenceNo      String?
+  amount           Decimal          @db.Decimal(12, 2)
+
+  driver ddm_tbl_driverInfo @relation(fields: [driverId], references: [id])
+
+  created_at DateTime @default(now())
+}
+
+enum DriverCarAssignment {
+  GROUP_A
+  GROUP_B
+  DAILY
+  TRUCK
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  LEGAL
+  HOLD_ACTIVE
+}
+
+enum LedgerType {
+  CREDIT // deposit
+  DEBIT // charges
+}
+
+enum ContributionType {
+  SSS
+  PHILHEALTH
+  PAGIBIG
 }
