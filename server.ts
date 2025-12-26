@@ -22,6 +22,7 @@ import { corsOptions } from './config/corsOptions.js';
 import usersRoutes from './routes/usersRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import imageRoutes from './routes/uploadImageRoutes.js';
+import driverRoutes from './routes/driverRoutes.js';
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 
 // API Routes
 app.use('/api/users', usersRoutes);
+app.use('/api/drivers', driverRoutes);
 // app.use('/api/auth', googleRoutes);
 // app.use('/api/images', imageRoutes);
 
