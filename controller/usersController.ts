@@ -6,6 +6,8 @@ import { generateToken, refreshGenToken } from '../middleware/generateToken';
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
+import { verifyJwt } from '../middleware/generateToken';
+
 
 dotenv.config();
 
@@ -49,60 +51,55 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   const cookies = req.cookies;
 
   if (!cookies?.jwt || typeof cookies.jwt !== 'string') {
-    return res.status(401).json({ message: 'Unauthorized53' });
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const refreshToken = cookies.jwt;
+  let decoded;
+  try {
+    decoded = await verifyJwt(
+      cookies.jwt,
+      process.env.REFRESH_TOKEN_SECRET as string
+    );
+  } catch {
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
+    return res.status(403).json({ message: 'Forbidden' });
+  }
 
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET as string,
-    async (err, decoded: any) => {
-      if (err) {
-        res.clearCookie('jwt', {
-          httpOnly: true,
-          sameSite: 'none',
-          secure: true,
-        });
-        return res.status(403).json({ message: 'Forbidden' });
-      }
+  const userId = (decoded as any).UserInfo?.id;
 
-      const userId = decoded.UserInfo?.id;
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-      if (!userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
+  const user = await prisma.udm_tbl_users.findUnique({
+    where: { id: userId },
+  });
 
-      const user = await prisma.udm_tbl_users.findUnique({
-        where: { id: userId }
-      });
+  if (!user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-      if (!user) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
+  const accessToken = generateToken(user.id, user.email, user.status,
+        user.fullname);
 
-      const accessToken = generateToken(
-        user.id,
-        user.email,
-        user.status,
-        user.fullname
-      );
-
-      return res.status(200).json({
-        msg: 'Refreshed',
-        token: accessToken,
-        data: {
-          id: user.id,
-          email: user.email,
-          fullname: user.fullname,
-          status: user.status,
-          created_at: user.created_at,
-          updated_at: user.updated_at
-        }
-      });
-    }
-  );
+  return res.status(200).json({
+    msg: 'Refreshed',
+    token: accessToken,
+    data: {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname,
+      status: user.status,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    },
+  });
 });
+
 
 
 
