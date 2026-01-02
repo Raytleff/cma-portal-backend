@@ -1,14 +1,17 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { permission } from 'process';
 dotenv.config();
 
-export const generateToken = (id: string, username: string, status: string | null) => {
+export const generateToken = (id: string, username: string, status: string | null, roles: any, permission: any) => {
     return jwt.sign(
         {
             UserInfo: {
                 id,
                 username,
-                status
+                status,
+                roles,
+                permission
             }
         },
         process.env.JWT_SECRET as string,
