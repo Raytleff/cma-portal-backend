@@ -6,7 +6,6 @@ import { generateToken, refreshGenToken } from '../middleware/generateToken';
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
-import supabase from '../config/supabase.js';
 import { verifyJwt } from '../middleware/generateToken';
 
 
@@ -84,7 +83,8 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const accessToken = generateToken(user.id, user.email, user.status);
+  const accessToken = generateToken(user.id, user.email, user.status,
+        user.fullname);
 
   return res.status(200).json({
     msg: 'Refreshed',
