@@ -33,8 +33,8 @@ export const userLogin = asyncHandler(async (req: Request, res: Response) => {
     email: user.email,
     status: user.status,
     roles:roles,
-    permissions:permissions
-
+    permissions:permissions,
+    fullname: user.fullname
   });
 
   // 6. Generate refresh token
@@ -192,11 +192,14 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
     }
   });
   
-  const accessToken = generateToken(
-    newUser.id,
-    newUser.email,
-    newUser.status
-  );
+  const accessToken = generateToken({
+    id: newUser.id,
+    email: newUser.email,
+    status: newUser.status,
+    roles: newUser.roles,             
+    permissions: newUser.permissions, 
+    fullname: newUser.fullname
+  });
 
   const refreshToken = await refreshGenToken(newUser.id);
 

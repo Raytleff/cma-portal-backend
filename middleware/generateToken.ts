@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { permission } from 'process';
 dotenv.config();
 
-export const generateToken = (id: string, username: string, status: string | null, roles: any, permission: any) => {
+export const generateToken = (id: string, username: string, status: string | null, roles: any, permission: any, fullname: string) => {
     return jwt.sign(
         {
             UserInfo: {
@@ -11,7 +11,8 @@ export const generateToken = (id: string, username: string, status: string | nul
                 username,
                 status,
                 roles,
-                permission
+                permission,
+                fullname
             }
         },
         process.env.JWT_SECRET as string,
