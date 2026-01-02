@@ -4,9 +4,11 @@ import * as driverService from '../service/driverService';
 export const createDriver = async (req: Request, res: Response) => {
   try {
     const driver = await driverService.createDriver(req.body);
-    res.status(201).json(driver);
+      res.status(201).json({
+        message: "Driver information added successfully!",
+        data: driver
+      });
   } catch (err: any) {
-      console.error("Create Driver Error:", err.message);
       res.status(400).json({
         message: err.message || "Failed to create driver"
       });
@@ -32,12 +34,30 @@ export const getDriver = async (req: Request, res: Response) => {
   }
 };
 
-export const updateDriver = async (req: Request, res: Response) => {
+export const getCurrentDriver = async (req: Request, res: Response) => {
   try {
-    const updated = await driverService.updateDriver(req.params.id, req.body);
-    res.status(200).json(updated);
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const driver = await driverService.getDriverByUserId(userId);
+    if (!driver) return res.status(404).json({ message: "Driver not found" });
+
+    res.status(200).json(driver);
   } catch (err) {
-    res.status(400).json({ message: "Failed to update driver" });
+    res.status(400).json({ message: "Failed to retrieve current driver" });
+  }
+};
+
+export const updateDriver = async (req: any, res: Response) => {
+  try {
+    const userId = req.user.id; // from auth middleware
+
+    const updated = await driverService.updateDriver(userId, req.body);
+
+    res.status(200).json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 };
 

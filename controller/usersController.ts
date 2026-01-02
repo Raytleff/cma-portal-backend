@@ -6,7 +6,6 @@ import { generateToken, refreshGenToken } from '../middleware/generateToken';
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
-import supabase from '../config/supabase.js';
 
 dotenv.config();
 
@@ -28,7 +27,7 @@ export const userLogin = asyncHandler(async (req: Request, res: Response) => {
       return res.status(401).json("Invalid email or Password");
     }
 
-    const jwtToken = generateToken(user.id, user.email, user.status);
+    const jwtToken = generateToken(user.id, user.email, user.status, user.fullname);
     const refreshToken = await refreshGenToken(user.id);
 
     res.cookie('jwt', refreshToken, {
@@ -85,7 +84,8 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
       const accessToken = generateToken(
         user.id,
         user.email,
-        user.status
+        user.status,
+        user.fullname
       );
 
       return res.status(200).json({
@@ -151,7 +151,7 @@ export const getUserById = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password, status } = req.body;
+  const { email, password, status, fullname } = req.body;
 
   const existingUser = await prisma.udm_tbl_users.findFirst({
     where: { email }
@@ -169,14 +169,16 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
       id,
       email,
       password: hashedPassword,
-      status
+      status,
+      fullname
     }
   });
   
   const accessToken = generateToken(
     newUser.id,
     newUser.email,
-    newUser.status
+    newUser.status,
+    newUser.fullname
   );
 
   const refreshToken = await refreshGenToken(newUser.id);

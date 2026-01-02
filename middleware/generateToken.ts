@@ -2,13 +2,14 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const generateToken = (id: string, username: string, status: string | null) => {
+export const generateToken = (id: string, username: string, status: string | null, fullname: string | null) => {
     return jwt.sign(
         {
             UserInfo: {
                 id,
                 username,
-                status
+                status,
+                fullname
             }
         },
         process.env.JWT_SECRET as string,
