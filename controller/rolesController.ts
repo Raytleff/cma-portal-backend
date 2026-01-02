@@ -22,9 +22,33 @@ export const getRoles = asyncHandler(async (_req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json({ msg: "OK", data: roles });
+    res.status(200).json({ data: roles });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+export const roleById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const role = await prisma.udm_tbl_roles.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        created_at: true
+      }
+    });
+
+    if (role) {
+      return res.status(200).json({msg: "OK", data: role});
+    }
+
+    res.status(404).json({ msg: "Not Found" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -66,23 +90,21 @@ export const createRole = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+export const updateRole = asyncHandler(async (req: Request, res: Response) => {
+  const { name, description } = req.body;
   const { id } = req.params;
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const updatedUser = await prisma.udm_tbl_users.update({
+  
+    const updateRole = await prisma.udm_tbl_roles.update({
       where: { id },
       data: {
-        email,
-        password: hashedPassword,
+        name,
+        description: description || "",
       },
     });
 
-    return res.status(200).json({ msg: "OK", data: updatedUser });
+    return res.status(200).json({ msg: "OK", data: updateRole });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

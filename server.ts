@@ -21,8 +21,12 @@ import { corsOptions } from './config/corsOptions.js';
 
 import usersRoutes from './routes/usersRoutes.js';
 import rolesRoutes from './routes/rolesRoutes.js';
+import userRoleRoutes from './routes/userRoleRoutes.js';
+import permissionsRoutes from './routes/permissionsRoutes.js';
+import rolePermissionRoutes from './routes/rolePermissionRoutes.js';
 import googleRoutes from './routes/googleRoutes.js';
 import imageRoutes from './routes/uploadImageRoutes.js';
+import { permission } from 'process';
 
 dotenv.config();
 
@@ -70,6 +74,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 // API Routes
 app.use('/api/users', usersRoutes);
 app.use('/api/roles', rolesRoutes);
+app.use('/api/user-roles', userRoleRoutes);
+app.use('/api/permissions', permissionsRoutes);
+app.use('/api/role-permissions', rolePermissionRoutes);
 // app.use('/api/auth', googleRoutes);
 // app.use('/api/images', imageRoutes);
 
