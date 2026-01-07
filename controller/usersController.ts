@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma.js';
 import supabase from '../config/supabase.js';
 import { verifyJwt } from '../middleware/generateToken';
+import { getUserRolesAndPermissions } from '../utils/authHelper'
 
 
 dotenv.config();
@@ -15,53 +16,66 @@ dotenv.config();
 export const userLogin = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  try {
-    const user = await prisma.udm_tbl_users.findFirst({
-      where: { email }
-    });
+  // 1. Find user
+  const user = await prisma.udm_tbl_users.findUnique({ where: { email } });
 
-    if (!user) {
-      return res.status(401).json("Invalid email or Password");
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-
-    if (!validPassword) {
-      return res.status(401).json("Invalid email or Password");
-    }
-
-    const jwtToken = generateToken(user.id, user.email, user.status);
-    const refreshToken = await refreshGenToken(user.id);
-
-    res.cookie('jwt', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 9 * 24 * 60 * 60 * 1000
-    });
-
-    return res.status(200).json({ msg: "Logged in", token: jwtToken });
-
-  } catch (error) {
-    console.error("ERROR OCCURRED: ", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+  if (!user) {
+    return res.status(401).json({ message: "Invalid email or password" });
   }
+
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (!validPassword) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
+  const { roles, permissions } = await getUserRolesAndPermissions(user.id);
+
+  const jwtToken = generateToken({
+    id: user.id,
+    email: user.email,
+    status: user.status,
+    roles:roles,
+    permissions:permissions
+
+  });
+
+  // 6. Generate refresh token
+  const refreshToken = await refreshGenToken(user.id);
+
+  // 7. Set cookie
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 9 * 24 * 60 * 60 * 1000,
+  });
+
+  // 8. Return response
+  return res.status(200).json({
+    msg: "Logged in successfully",
+    token: jwtToken,
+    data: {
+      id: user.id,
+      email: user.email,
+      status: user.status,
+      roles:roles,
+      permissions:permissions
+    },
+  });
 });
 
 export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
   const cookies = req.cookies;
 
+  // 1. Check if refresh token exists
   if (!cookies?.jwt || typeof cookies.jwt !== 'string') {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   let decoded;
   try {
-    decoded = await verifyJwt(
-      cookies.jwt,
-      process.env.REFRESH_TOKEN_SECRET as string
-    );
+    decoded = await verifyJwt(cookies.jwt, process.env.REFRESH_TOKEN_SECRET as string);
   } catch {
+    // Invalid or expired refresh token
     res.clearCookie('jwt', {
       httpOnly: true,
       sameSite: 'none',
@@ -76,6 +90,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
+  // 2. Fetch user
   const user = await prisma.udm_tbl_users.findUnique({
     where: { id: userId },
   });
@@ -83,25 +98,31 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   if (!user) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+  const { roles, permissions } = await getUserRolesAndPermissions(user.id);
 
-  const accessToken = generateToken(user.id, user.email, user.status);
+  const accessToken = generateToken({
+    id: user.id,
+    email: user.email,
+    status: user.status,
+    roles:roles,             
+    permissions: permissions, 
+  });
 
   return res.status(200).json({
-    msg: 'Refreshed',
+    msg: 'Token refreshed',
     token: accessToken,
     data: {
       id: user.id,
       email: user.email,
       fullname: user.fullname,
       status: user.status,
+      roles:roles,
+      permissions: permissions,
       created_at: user.created_at,
       updated_at: user.updated_at,
     },
   });
 });
-
-
-
 
 
 export const getUsers = asyncHandler(async (_req: Request, res: Response) => {
@@ -198,7 +219,7 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
 
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email,fullname,password } = req.body;
   const { id } = req.params;
 
   try {
@@ -209,6 +230,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
       where: { id },
       data: {
         email,
+        fullname,
         password: hashedPassword
       }
     });
