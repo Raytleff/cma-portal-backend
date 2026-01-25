@@ -1,4 +1,6 @@
 import prisma from '../config/prisma';
+import supabase from '../config/supabase';
+import { v4 as uuid } from 'uuid';
 import { CreateDriverDto, UpdateDriverDto } from '../types/driver';
 
 
@@ -43,7 +45,7 @@ export const getAllDrivers = async () => {
             contributions: true
         }
     });
-}
+};
 
 // GET DRIVER BY ID
 export const getDriverById = async (id: string) => {
@@ -109,4 +111,31 @@ export const getDriverBalance = async (driverId: string) => {
   });
 
   return balance;
+};
+
+// UPLOAD IMAGE
+export const uploadDriverLicenseImage = async (driverId: string, file: Express.Multer.File) => {
+  const fileExt = file.originalname.split('.').pop();
+  const fileName = `driver/${driverId}/${uuid()}.${fileExt}`;
+
+  // Upload to Supabase
+  const { error } = await supabase.storage
+    .from('driver-licenses')
+    .upload(fileName, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true
+    });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage
+    .from('driver-licenses')  
+    .getPublicUrl(fileName);
+
+    const driver = await prisma.ddm_tbl_driverInfo.update({
+      where: { id: driverId },
+      data: { licenseImageUrl: data.publicUrl }
+    });
+
+    return driver;
 };

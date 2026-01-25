@@ -1,6 +1,7 @@
 import {Request , Response} from 'express';
 import * as driverService from '../service/driverService';
 
+
 export const createDriver = async (req: Request, res: Response) => {
   try {
     const driver = await driverService.createDriver(req.body);
@@ -76,5 +77,28 @@ export const getDriverBalance = async (req: Request, res: Response) => {
     res.status(200).json({ driverId: req.params.id, balance });
   } catch (err) {
     res.status(400).json({ message: "Failed to retrieve driver balance" });
+  }
+};
+
+export const uploadLicenseImage = async (req: Request, res: Response) => {
+  try {
+    const driverId = req.params.id;
+    const file = req.file;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Image file is required" });
+    }
+
+    const driver = await driverService.uploadDriverLicenseImage(
+      driverId,
+      req.file
+    );
+
+    res.status(200).json(driver);
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({
+      message: err.message || "Failed to upload license image",
+    });
   }
 };
